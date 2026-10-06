@@ -1,0 +1,37 @@
+{
+  "name": "tweak-for-claude",
+  "displayName": "Tweak for Claude",
+  "description": "A ✎ button in Claude Code's chat box: send a tweak that Claude reads after its current step. Needs the Tweak mod, which makes plain messages wait until Claude finishes.",
+  "version": "0.2.1",
+  "publisher": "fahim",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "scripts": {
+    "vscode:uninstall": "node ./uninstall.js"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "tweak.add",
+        "title": "Tweak: Add the ✎ button to Claude's chat box"
+      },
+      {
+        "command": "tweak.remove",
+        "title": "Tweak: Take the ✎ button out of Claude's chat box"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Fahim-2135/tweak"
+  }
+}

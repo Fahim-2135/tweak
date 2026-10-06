@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "tweak",
+  "version": "0.2.1",
+  "description": "While Claude works, a message waits until it finishes; start it with \"now:\" (or press the ✎ button) to tweak the running task instead.",
+  "author": {
+    "name": "Fahim",
+    "url": "https://github.com/Fahim-2135"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/Fahim-2135/tweak"
+}

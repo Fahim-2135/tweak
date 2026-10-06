@@ -1,0 +1,4 @@
+{
+  "description": "Tweak: queue by default, tweak with now:",
+  "modules": ["./tweak.mjs"]
+}

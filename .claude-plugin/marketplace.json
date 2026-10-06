@@ -1,0 +1,15 @@
+{
+  "name": "tweak",
+  "owner": { "name": "Fahim", "url": "https://github.com/Fahim-2135" },
+  "metadata": {
+    "description": "Tweak: talk to Claude Code while it works. Messages wait until it finishes; \"now:\" changes the running task."
+  },
+  "plugins": [
+    {
+      "name": "tweak",
+      "source": "./",
+      "description": "While Claude works, a message waits until it finishes; start it with \"now:\" (or press the ✎ button in VS Code) to tweak the running task instead.",
+      "license": "MIT"
+    }
+  ]
+}
