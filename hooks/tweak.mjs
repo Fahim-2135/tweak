@@ -11,8 +11,23 @@
 // front. Claude Code itself hands any message typed mid-task to Claude at its next step; this
 // mod holds the plain ones back and sends them once the task is done.
 
-/** Who typed it: a person at the box (terminal, VS Code, the phone), never a task or a peer. */
-const PEOPLE = new Set(["composer", "sdk", "bridge", "unclassified"]);
+/**
+ * Senders that aren't a person typing: never held. Anything else is (the terminal's "composer",
+ * VS Code's "human", the SDK's "sdk", the phone's "bridge", and kinds newer Claude Codes add).
+ */
+const AUTOMATED = new Set([
+  "task-notification",
+  "scheduled-trigger",
+  "peer",
+  "peer-send-message",
+  "projects-relay",
+  "channel",
+  "coordinator",
+  "observer",
+  "observer-activity",
+  "auto-continuation",
+  "plugin",
+]);
 const NOW = /^\s*now\s*:\s*/i;
 
 let disabled = false;
@@ -61,7 +76,7 @@ export function register(on) {
     // A plain message typed while Claude works waits for the task to finish. Pictures can't be
     // sent again later, so a message with any goes in now.
     const midTask = Boolean(turn && e.turnId);
-    if (!midTask || !PEOPLE.has(e.origin?.kind) || e.attachments?.length) return next(e);
+    if (!midTask || AUTOMATED.has(e.origin?.kind) || e.attachments?.length) return next(e);
     held.push(e.text);
     return {
       drop: `Queued: sent when Claude finishes this task. To change the task now, start with "now:" or press ✎.`,

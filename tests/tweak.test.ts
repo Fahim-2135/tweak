@@ -118,3 +118,18 @@ test("off in Crew's agent runs", async ($, on) => {
   await $.prompt.submit(typed("hold me", "t1") as any);
   expect(seen.entered).toEqual(["hold me"]);
 });
+
+test("VS Code's typed messages (origin human) are held too", async ($, on) => {
+  const seen = setup(on);
+  await working($);
+  const answer = await $.prompt.submit({
+    text: "after this, also write summary.md",
+    wait: false,
+    turnId: "t1",
+    origin: { kind: "human" },
+  } as any);
+  expect(answer.drop).toMatch(/Queued/);
+  await $.turn.complete({ turnId: "t1", ...DONE } as any);
+  await settle();
+  expect(seen.sent.map((s) => s.text)).toEqual(["after this, also write summary.md"]);
+});
