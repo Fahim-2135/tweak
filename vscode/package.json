@@ -2,7 +2,7 @@
   "name": "tweak-for-claude",
   "displayName": "Tweak for Claude",
   "description": "A ✎ button in Claude Code's chat box: send a tweak that Claude reads after its current step. Needs the Tweak mod, which makes plain messages wait until Claude finishes.",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "publisher": "fahim",
   "license": "MIT",
   "engines": {

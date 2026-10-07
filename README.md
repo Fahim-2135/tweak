@@ -19,7 +19,7 @@ Out of the box, Claude Code hands *every* message typed mid-task to Claude at it
 | You do | What happens |
 | --- | --- |
 | Press Enter while Claude works | Held. You see "Queued: sent when Claude finishes this task." It goes in, as your own message, when the task ends. |
-| Start with `now:` / press ✎ / Alt+Enter | Goes into the running task now; Claude reads it after its current step (a 5-minute build finishes first). |
+| Start with `now:` / press ✎ / Alt+Enter | Goes into the running task now; Claude reads it after its current step (a 5-minute build finishes first). ✎ with text in the box sends it; ✎ on an empty box lights up and makes your next message a tweak (Esc cancels). |
 | Stop Claude with queued messages | They don't fire; they come back into the box. |
 | Send a picture mid-task | Goes in now (a picture can't be held and sent again later). |
 | Type between tasks | Nothing changes; `now:` is simply removed. |
@@ -38,7 +38,7 @@ Then start a new chat, or run `/reload-plugins` in an open one.
 **2. The ✎ button in VS Code** (optional): download `tweak-for-claude-*.vsix` from the [latest release](https://github.com/Fahim-2135/tweak/releases/latest), then
 
 ```
-code --install-extension tweak-for-claude-0.2.1.vsix
+code --install-extension tweak-for-claude-0.2.3.vsix
 ```
 
 and reload the window (Ctrl+Shift+P → **Developer: Reload Window**). The ✎ sits right after the **/** button in Claude's chat box.

@@ -15,26 +15,64 @@ const path = require("node:path");
 const START = "/*<<tweak-button>>*/";
 const END = "/*<</tweak-button>>*/";
 
-// Runs inside Claude Code's chat panel. Plain DOM: finds the "/" button by its title, adds ✎
-// after it, and sends "now: <text>" through the box's own Enter.
+// Runs inside Claude Code's chat panel. Plain DOM: finds the "/" button by its title and adds ✎
+// after it. With text in the box, ✎ sends it as "now: <text>" through the box's own Enter. On an
+// empty box it lights up instead, and the next message you send goes as a tweak.
 const INJECT = `${START}
 ;(() => {
   const KEY = "tweak-button";
+  const ARMED_HINT = "Tweak: Claude reads this after its current step…";
   const box = () => document.querySelector('[aria-label="Message input"]');
   const PENCIL = '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 2.5l3 3L5 14H2v-3z"/><path d="M9 4l3 3"/></svg>';
-  function send() {
-    const el = box();
-    if (!el) return;
-    const text = (el.innerText || "").trim();
-    el.focus();
-    if (!text) return;
+  let armed = false;
+  let placeholder = null;
+  const textOf = (el) => (el.innerText || "").trim();
+  /** Put "now: " in front of what's in the box, the way typing would. */
+  function prefix(el) {
+    const text = textOf(el);
+    if (/^\\s*now\\s*:/i.test(text)) return;
     const range = document.createRange();
     range.selectNodeContents(el);
     const sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
-    document.execCommand("insertText", false, /^\\s*now\\s*:/i.test(text) ? text : "now: " + text);
+    document.execCommand("insertText", false, "now: " + text);
+  }
+  function look() {
+    const b = document.querySelector("." + KEY);
+    const el = box();
+    if (b) {
+      b.style.color = armed ? "var(--vscode-charts-orange, #d97757)" : "";
+      b.setAttribute("aria-pressed", armed ? "true" : "false");
+    }
+    if (el) {
+      if (armed) {
+        if (placeholder === null) placeholder = el.getAttribute("data-placeholder");
+        el.setAttribute("data-placeholder", ARMED_HINT);
+      } else if (placeholder !== null) {
+        el.setAttribute("data-placeholder", placeholder);
+        placeholder = null;
+      }
+    }
+  }
+  function arm(on) {
+    armed = on;
+    look();
+  }
+  function send() {
+    const el = box();
+    if (!el) return;
+    el.focus();
+    if (!textOf(el)) return;
+    prefix(el);
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", keyCode: 13, which: 13, bubbles: true, cancelable: true }));
+    arm(false);
+  }
+  function press() {
+    const el = box();
+    if (el && textOf(el)) return send();
+    arm(!armed);
+    if (el) el.focus();
   }
   function place() {
     const slash = document.querySelector('button[title="Show command menu (/)"]');
@@ -42,7 +80,7 @@ const INJECT = `${START}
     const b = document.createElement("button");
     b.type = "button";
     b.className = slash.className + " " + KEY;
-    b.title = "Tweak: send this to Claude now; it reads it after its current step (Alt+Enter). Plain Enter waits until Claude finishes.";
+    b.title = "Tweak: Claude reads it after its current step (Alt+Enter). Click with text to send it now, or on an empty box to make your next message a tweak. Plain Enter waits until Claude finishes.";
     b.setAttribute("aria-label", "Send as a tweak");
     b.innerHTML = PENCIL;
     // Match the "/" icon's size; the button class alone lets the svg grow.
@@ -53,14 +91,25 @@ const INJECT = `${START}
     svg.style.height = size + "px";
     svg.style.flex = "none";
     b.addEventListener("mousedown", (e) => e.preventDefault());
-    b.addEventListener("click", send);
+    b.addEventListener("click", press);
     slash.after(b);
+    look();
   }
   document.addEventListener("keydown", (e) => {
-    if (e.altKey && e.key === "Enter" && e.target === box()) {
+    const el = box();
+    if (e.target !== el || e.isComposing) return;
+    if (e.altKey && e.key === "Enter") {
       e.preventDefault();
       e.stopPropagation();
       send();
+      return;
+    }
+    if (armed && e.key === "Escape") return arm(false);
+    // Armed: this Enter sends a tweak. The box sends what it holds, so add "now: " first and let
+    // the Enter carry on to the box.
+    if (armed && e.key === "Enter" && !e.shiftKey && e.isTrusted && textOf(el)) {
+      prefix(el);
+      setTimeout(() => arm(false), 0);
     }
   }, true);
   new MutationObserver(place).observe(document.documentElement, { childList: true, subtree: true });
