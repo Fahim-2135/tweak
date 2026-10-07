@@ -133,3 +133,24 @@ test("VS Code's typed messages (origin human) are held too", async ($, on) => {
   await settle();
   expect(seen.sent.map((s) => s.text)).toEqual(["after this, also write summary.md"]);
 });
+
+test("held even when the typed message carries no turnId (VS Code)", async ($, on) => {
+  const seen = setup(on);
+  await working($);
+  const answer = await $.prompt.submit({
+    text: "after this, also write notes.md",
+    wait: false,
+    origin: { kind: "human" },
+  } as any);
+  expect(answer.drop).toMatch(/Queued/);
+  await $.turn.complete({ turnId: "t1", ...DONE } as any);
+  await settle();
+  expect(seen.sent.map((s) => s.text)).toEqual(["after this, also write notes.md"]);
+});
+
+test("a message typed while idle goes straight in", async ($, on) => {
+  const seen = setup(on);
+  await $.session.start({ surface: "vscode", isInteractive: true, cwd: "/work" });
+  await $.prompt.submit({ text: "hello", wait: false, origin: { kind: "human" } } as any);
+  expect(seen.entered).toEqual(["hello"]);
+});

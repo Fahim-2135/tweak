@@ -55,7 +55,7 @@ Claude Code's VS Code panel has no place for other extensions' buttons. So the e
 
 `hooks/tweak.mjs` is a Claude Code mod (function hooks):
 
-- `prompt.submit`: a message typed by you while a turn runs (`e.turnId` set) is answered with `{ drop }` and held; `now:` messages pass through with the prefix removed. Task notifications and messages from other agents are never held.
+- `prompt.submit`: a message typed by you while a turn runs (the mod tracks the running turn from `turn.start`; the message itself may carry no `turnId`, as in VS Code) is answered with `{ drop }` and held; `now:` messages pass through with the prefix removed. Task notifications and messages from other agents are never held.
 - `turn.complete`: when the main turn ends, held messages go in with `$.prompt.submit({ text, asUser: true })`; if you stopped the turn, they go back into the box with `$.prompt.fill`.
 - It stays off in headless worker runs (`CREW_WORKER` / `BRAIN_WORKER`).
 

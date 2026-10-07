@@ -39,6 +39,8 @@ let held = [];
 export function register(on) {
   on("session.start", async ($, e, next) => {
     // Headless helpers (Crew's agent runs, the brain's night jobs) have nobody typing.
+    turn = null;
+    held = [];
     disabled = Boolean((await $.env.get("CREW_WORKER")) || (await $.env.get("BRAIN_WORKER")));
     return next(e);
   });
@@ -75,7 +77,9 @@ export function register(on) {
 
     // A plain message typed while Claude works waits for the task to finish. Pictures can't be
     // sent again later, so a message with any goes in now.
-    const midTask = Boolean(turn && e.turnId);
+    // (Some setups, e.g. VS Code, send no turnId on the message itself, so the running turn we
+    // tracked is the only reliable signal.)
+    const midTask = Boolean(turn);
     if (!midTask || AUTOMATED.has(e.origin?.kind) || e.attachments?.length) return next(e);
     held.push(e.text);
     return {
